@@ -92,9 +92,7 @@ STATEMENTS = [
     ALTER_TABLE_STATEMENT,
 ]
 
-
-# Main function
-if __name__=="__main__":
+def test_alter_table_single_action():
     alter_table_statement_pattern = re.compile(str(ALTER_TABLE_STATEMENT), re.IGNORECASE)
     sql_string = "ALTER TABLE test ADD COLUMN `count` SMALLINT ( 6 ) NULL"
 
@@ -119,6 +117,10 @@ if __name__=="__main__":
     regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
     print("(COLUMN NAME): ", regex_match_4.group(1))
     print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
+
+# Main function
+if __name__=="__main__":
+   test_alter_table_single_action()
 
 
     
