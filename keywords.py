@@ -100,21 +100,20 @@ if __name__=="__main__":
 
     regex_match = alter_table_statement_pattern.match(sql_string)
 
-    print(regex_match)
-    print("(ALTER TABLE) group: ", regex_match.group(1))
+    print("(ALTER TABLE) COMMAND: ", regex_match.group(1))
     print("(TABLE_NAME): ", regex_match.group(2))
-    print("(ALTER_TABLE_ACTION): ", regex_match.group(3))
+    print("(ALTER_TABLE_ACTION) group: ", regex_match.group(3))
   
    
     alter_table_action_pattern = re.compile(str(ALTER_TABLE_ACTION), re.IGNORECASE)
     regex_match_2 = alter_table_action_pattern.match(regex_match.group(3))
-    print(regex_match_2)
-    print("(ADD COLUMN DEFINITION) group: ", regex_match_2.group(1))
+ 
+    print("(ADD COLUMN DEFINITION): ", regex_match_2.group(1))
 
     add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
     regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
-    print("(ADD COLUMN) group: ", regex_match_3.group(1))
-    print("(COLUMN DEFINITION) group: ", regex_match_3.group(2))
+    print("(ADD COLUMN) COMMAND: ", regex_match_3.group(1))
+    print("(COLUMN DEFINITION): ", regex_match_3.group(2))
 
     column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
     regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
