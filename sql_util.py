@@ -63,20 +63,17 @@ class sql_token(object):
             alter_table_action_pattern = re.compile(str(keywords.ALTER_TABLE_ACTION), re.IGNORECASE)
             regex_match_2 = alter_table_action_pattern.match(action)
         
-            # print("(ADD COLUMN DEFINITION): ", regex_match_2.group(1))
-        
             add_column_definition_pattern = re.compile(str(keywords.ADD_COLUMN_DEFINITION), re.IGNORECASE)
-            regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
-     
+            regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1)) 
 
             cmd['command'] = regex_match_3.group(1)
 
             column_definition_pattern = re.compile(str(keywords.COLUMN_DEFINITION), re.IGNORECASE)
             regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
-            # print("(COLUMN NAME): ", regex_match_4.group(1))
-            # print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
+         
             cmd['name'] = regex_match_4.group(1)
-            cmd['type'] = regex_match_4.group(2)
+            cmd['type'] = regex_match_4.group(2).lower()
             alter_cmd.append(cmd)
+
         stat_dict['alter_cmd'] = alter_cmd
         return stat_dict
