@@ -66,13 +66,13 @@ class sql_token(object):
             add_column_definition_pattern = re.compile(str(keywords.ADD_COLUMN_DEFINITION), re.IGNORECASE)
             add_column_definition_match = add_column_definition_pattern.match(alter_table_action_match.group(1)) 
 
-            cmd['command'] = add_column_definition_match.group(1)
+            cmd['command'] = add_column_definition_match.group(1).strip()
 
             column_definition_pattern = re.compile(str(keywords.COLUMN_DEFINITION), re.IGNORECASE)
             column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
          
-            cmd['name'] = column_definition_match.group(1)
-            cmd['type'] = column_definition_match.group(2).lower()
+            cmd['name'] = column_definition_match.group(1).strip()
+            cmd['type'] = column_definition_match.group(2).strip().lower()
             alter_cmd.append(cmd)
 
         stat_dict['alter_cmd'] = alter_cmd
