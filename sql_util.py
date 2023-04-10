@@ -71,7 +71,7 @@ class sql_token(object):
             column_definition_pattern = re.compile(str(keywords.COLUMN_DEFINITION), re.IGNORECASE)
             column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
         
-            cmd['name'] = column_definition_match.group(1).strip()
+            cmd['name'] = column_definition_match.group(1).strip().strip("`")
             cmd['column_type'] = column_definition_match.group(2).strip().lower().replace(" ", "")
 
             data_type_or_domain_pattern = re.compile(str(keywords.DATA_TYPE_OR_DOMAIN_NAME), re.IGNORECASE)
