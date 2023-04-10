@@ -71,7 +71,7 @@ ALTER_TABLE_STATEMENT
 Function: Change the definition of a table
 """
 
-COLUMN_DEFINITION = Token(r'(' + str(COLUMN_NAME) + r')' + r'\s+' + r'(' + str(DATA_TYPE_OR_DOMAIN_NAME) + r')', TTYPE.definition)
+COLUMN_DEFINITION = Token(  str(COLUMN_NAME)  + r'\s+' + r'(' + str(DATA_TYPE_OR_DOMAIN_NAME) + r')', TTYPE.definition)
 
 ADD_COLUMN_DEFINITION = Token(r'(ADD\s+(?:\bCOLUMN\b)?)\s+' +r'(' + str(COLUMN_DEFINITION) + r')' , TTYPE.definition)
 
@@ -114,6 +114,12 @@ if __name__=="__main__":
     add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
     regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
     print("(ADD COLUMN) group: ", regex_match_3.group(1))
+    print("(COLUMN DEFINITION) group: ", regex_match_3.group(2))
+
+    column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
+    regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
+    print("(COLUMN NAME): ", regex_match_4.group(1))
+    print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
 
 
     
