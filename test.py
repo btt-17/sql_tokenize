@@ -15,7 +15,9 @@ if __name__=="__main__":
 
     --Test:
         ALTER TABLE test
-        ADD COLUMN `count` SMALLINT(6) NULL 
+        ADD COLUMN `count` SMALLINT(6) NULL,
+        ADD COLUMN `log` VARCHAR(12),
+        ADD COLUMN status /*debug*/ INT(10)
     """
     token_sql=sql_token()
     token_sql.parse_sql(statement)

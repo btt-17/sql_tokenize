@@ -30,15 +30,15 @@ class sql_token(object):
         for statement in statements_list:
             stat_dict = {}
             stat_cleanup = self.clean(statement)
-            print("Line 33: ", stat_cleanup)
+            
             for cmd_regex_match, cmd_type in self._SQL_STATEMENT:
                 match_result = cmd_regex_match(stat_cleanup)
-                print("Line 36: ", match_result, cmd_regex_match)
+                
                 if not match_result:
                     continue
                 else:
                     if cmd_type == keywords.TTYPE.statement.alter_table:
-                        print("Line 42: ", cmd_type)
+                       
                         stat_dict = self.parse_alter_table(match_result)
                         break
 
@@ -52,5 +52,32 @@ class sql_token(object):
         stat_dict ["command"] = regex_match.group(1).upper().strip()
         stat_dict ["name"] = regex_match.group(2).strip().strip('`')
 
+        actions_list = []
+        actions_list.append(regex_match.group(3))
+        actions_list.extend(alter_stat.split(',')[1:])
+        alter_cmd = []
+        for i, action in enumerate(actions_list):
+            cmd = {}
+          
+            action = action.strip()
+            alter_table_action_pattern = re.compile(str(keywords.ALTER_TABLE_ACTION), re.IGNORECASE)
+            regex_match_2 = alter_table_action_pattern.match(action)
+        
+            # print("(ADD COLUMN DEFINITION): ", regex_match_2.group(1))
+        
+            add_column_definition_pattern = re.compile(str(keywords.ADD_COLUMN_DEFINITION), re.IGNORECASE)
+            regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
+            # print("(ADD COLUMN) COMMAND: ", regex_match_3.group(1))
+            # print("(COLUMN DEFINITION): ", regex_match_3.group(2))
 
+            cmd['command'] = regex_match_2.group(1)
+
+            column_definition_pattern = re.compile(str(keywords.COLUMN_DEFINITION), re.IGNORECASE)
+            regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
+            # print("(COLUMN NAME): ", regex_match_4.group(1))
+            # print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
+            cmd['name'] = regex_match_4.group(1)
+            cmd['type'] = regex_match_4.group(2)
+            alter_cmd.append(cmd)
+        stat_dict['alter_cmd'] = alter_cmd
         return stat_dict
