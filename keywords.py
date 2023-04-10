@@ -79,7 +79,7 @@ ALTER_TABLE_ACTION = Token(r'(' + str(ADD_COLUMN_DEFINITION)  + r')'  , TTYPE.ac
 
 ALTER_TABLE_STATEMENT = Token(
     r'(ALTER TABLE)\s+' + r"(" 
-    + str(TABLE_NAME) +r")" + r"\s+" + r"(?:" +str(ALTER_TABLE_ACTION)  + r"){1,}" + r".*", 
+    + str(TABLE_NAME) +r")" + r"\s+" + r"(?:" +str(ALTER_TABLE_ACTION)  + r")" + r".*", 
     TTYPE.statement.alter_table
 )
 
