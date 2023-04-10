@@ -96,56 +96,56 @@ def test_alter_table_single_action():
     alter_table_statement_pattern = re.compile(str(ALTER_TABLE_STATEMENT), re.IGNORECASE)
     sql_string = "ALTER TABLE test ADD COLUMN `count` SMALLINT ( 6 ) NULL"
 
-    regex_match = alter_table_statement_pattern.match(sql_string)
+    alter_table_statement_match = alter_table_statement_pattern.match(sql_string)
 
-    print("(ALTER TABLE) COMMAND: ", regex_match.group(1))
-    print("(TABLE_NAME): ", regex_match.group(2))
-    print("(ALTER_TABLE_ACTION) group: ", regex_match.group(3))
+    print("(ALTER TABLE) COMMAND: ", alter_table_statement_match.group(1))
+    print("(TABLE_NAME): ", alter_table_statement_match.group(2))
+    print("(ALTER_TABLE_ACTION) group: ", alter_table_statement_match.group(3))
   
     alter_table_action_pattern = re.compile(str(ALTER_TABLE_ACTION), re.IGNORECASE)
-    regex_match_2 = alter_table_action_pattern.match(regex_match.group(3))
+    alter_table_action_match = alter_table_action_pattern.match(alter_table_statement_match.group(3))
  
-    print("(ADD COLUMN DEFINITION): ", regex_match_2.group(1))
+    print("(ADD COLUMN DEFINITION): ", alter_table_action_match.group(1))
 
     add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
-    regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
-    print("(ADD COLUMN) COMMAND: ", regex_match_3.group(1))
-    print("(COLUMN DEFINITION): ", regex_match_3.group(2))
+    add_column_definition_match = add_column_definition_pattern.match(alter_table_action_match.group(1))
+    print("(ADD COLUMN) COMMAND: ", add_column_definition_match.group(1))
+    print("(COLUMN DEFINITION): ", add_column_definition_match.group(2))
 
     column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
-    regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
-    print("(COLUMN NAME): ", regex_match_4.group(1))
-    print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
+    column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
+    print("(COLUMN NAME): ", column_definition_match.group(1))
+    print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
 
 def test_alter_table_multi_action():
     alter_table_statement_pattern = re.compile(str(ALTER_TABLE_STATEMENT), re.IGNORECASE)
     sql_string = "ALTER TABLE test ADD COLUMN `count` SMALLINT  , ADD COLUMN `log` VARCHAR  , ADD COLUMN status INT "
-    regex_match = alter_table_statement_pattern.match(sql_string+" ,")
-    print("(ALTER TABLE) COMMAND: ", regex_match.group(1))
-    print("(TABLE_NAME): ", regex_match.group(2))
+    alter_table_statement_match = alter_table_statement_pattern.match(sql_string+" ,")
+    print("(ALTER TABLE) COMMAND: ", alter_table_statement_match.group(1))
+    print("(TABLE_NAME): ", alter_table_statement_match.group(2))
 
     
     actions_list = []
-    actions_list.append(regex_match.group(3))
+    actions_list.append(alter_table_statement_match.group(3))
     actions_list.extend(sql_string.split(',')[1:])
 
     for i, action in enumerate(actions_list):
         print(f"===== Action {i+1} ====")
         action = action.strip()
         alter_table_action_pattern = re.compile(str(ALTER_TABLE_ACTION), re.IGNORECASE)
-        regex_match_2 = alter_table_action_pattern.match(action)
+        alter_table_action_pattern_match = alter_table_action_pattern.match(action)
     
-        print("(ADD COLUMN DEFINITION): ", regex_match_2.group(1))
+        print("(ADD COLUMN DEFINITION): ", alter_table_action_pattern_match.group(1))
 
         add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
-        regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
-        print("(ADD COLUMN) COMMAND: ", regex_match_3.group(1))
-        print("(COLUMN DEFINITION): ", regex_match_3.group(2))
+        add_column_definition_match = add_column_definition_pattern.match(alter_table_action_pattern_match.group(1))
+        print("(ADD COLUMN) COMMAND: ", add_column_definition_match.group(1))
+        print("(COLUMN DEFINITION): ", add_column_definition_match.group(2))
 
         column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
-        regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
-        print("(COLUMN NAME): ", regex_match_4.group(1))
-        print("(DATA TYPE OR DOMAIN_NAME): ", regex_match_4.group(2))
+        column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
+        print("(COLUMN NAME): ", column_definition_match.group(1))
+        print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
 
 
 # Main function
