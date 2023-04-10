@@ -82,7 +82,7 @@ COLUMN_CONSTRAINT_DEFINITION = Token(str(COLUMN_CONSTRAINT), TTYPE.definition)
 COLUMN_DEFINITION = Token(  str(COLUMN_NAME)  + r'\s+' + r'(' + str(DATA_TYPE_OR_DOMAIN_NAME) + r')' + 
                             r'(' + r'\s+' + str(COLUMN_CONSTRAINT_DEFINITION) + r')*', TTYPE.definition)
 
-ADD_COLUMN_DEFINITION = Token(r'(ADD\s+(?:\bCOLUMN\b)?)\s+' +r'(' + str(COLUMN_DEFINITION) + r')' , TTYPE.definition)
+ADD_COLUMN_DEFINITION = Token(r'(ADD(?:\b\s+COLUMN\b)?)\s+' +r'(' + str(COLUMN_DEFINITION) + r')' , TTYPE.definition)
 
 ALTER_TABLE_ACTION = Token(r'(' + str(ADD_COLUMN_DEFINITION)  + r')'  , TTYPE.action)
 
@@ -105,7 +105,7 @@ def test_alter_table_single_action():
     alter_table_statement_pattern = re.compile(str(ALTER_TABLE_STATEMENT), re.IGNORECASE)
     sql_string_1 = "ALTER TABLE test ADD COLUMN `count` SMALLINT ( 6 ) NULL"
     sql_string_2 = "ALTER TABLE test ADD COLUMN `log` VARCHAR ( 12 ) NULL"
-    sql_string_3 = "ALTER TABLE test ADD COLUMN status INT ( 10 ) "
+    sql_string_3 = "ALTER TABLE test ADD status INT ( 10 ) "
     sql_string_4 = "ALTER TABLE test ADD COLUMN status INT "
     alter_table_statement_match = alter_table_statement_pattern.match(sql_string_3)
 
@@ -177,8 +177,8 @@ def test_alter_table_multi_action():
 
 # Main function
 if __name__=="__main__":
-#    test_alter_table_single_action()
-   test_alter_table_multi_action()
+   test_alter_table_single_action()
+#    test_alter_table_multi_action()
 
 
     
