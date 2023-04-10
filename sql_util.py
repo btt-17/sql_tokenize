@@ -67,10 +67,9 @@ class sql_token(object):
         
             add_column_definition_pattern = re.compile(str(keywords.ADD_COLUMN_DEFINITION), re.IGNORECASE)
             regex_match_3 = add_column_definition_pattern.match(regex_match_2.group(1))
-            # print("(ADD COLUMN) COMMAND: ", regex_match_3.group(1))
-            # print("(COLUMN DEFINITION): ", regex_match_3.group(2))
+     
 
-            cmd['command'] = regex_match_2.group(1)
+            cmd['command'] = regex_match_3.group(1)
 
             column_definition_pattern = re.compile(str(keywords.COLUMN_DEFINITION), re.IGNORECASE)
             regex_match_4 = column_definition_pattern.match(regex_match_3.group(2))
