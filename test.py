@@ -19,7 +19,6 @@ if __name__=="__main__":
         ADD COLUMN `log` VARCHAR(12),
         ADD status /*debug*/ INT(10),
         DROP COLUMN `count`,
-        DROP FOREIGN KEY fk_trigger_bar
     """
     token_sql=sql_token()
     token_sql.parse_sql(statement)
