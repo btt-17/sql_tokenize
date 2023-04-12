@@ -80,11 +80,20 @@ COLUMN_CONSTRAINT = Token(r'(NOT\s+NULL)?', TTYPE.keywords)
 COLUMN_CONSTRAINT_DEFINITION = Token(str(COLUMN_CONSTRAINT), TTYPE.definition)
 
 COLUMN_DEFINITION = Token(  str(COLUMN_NAME)  + r'\s+' + r'(' + str(DATA_TYPE_OR_DOMAIN_NAME) + r')' + 
-                            r'(' + r'\s+' + str(COLUMN_CONSTRAINT_DEFINITION) + r')*', TTYPE.definition)
+                            r'(' + r'\s+' + str(COLUMN_CONSTRAINT_DEFINITION) + r')*', TTYPE.definition.column_definition)
 
-ADD_COLUMN_DEFINITION = Token(r'(ADD(?:\b\s+COLUMN\b)?)\s+' +r'(' + str(COLUMN_DEFINITION) + r')' , TTYPE.definition)
+DROP_BEHAVIOR = Token(r"CASCADE|RESTRICT", TTYPE.keywords)
 
-ALTER_TABLE_ACTION = Token(r'(' + str(ADD_COLUMN_DEFINITION)  + r')'  , TTYPE.action)
+DROP_COLUMN_DEFINITION = Token(r'(DROP(?:\b\s+COLUMN\b)?)\s+'+ r'(' + str(COLUMN_NAME)+r')' + r"(" + r"\s+" + str(DROP_BEHAVIOR) + r"\s*"  r")?" , TTYPE.definition.drop_column_definition)
+
+ADD_COLUMN_DEFINITION = Token(r'(ADD(?:\b\s+COLUMN\b)?)\s+' + r'(' + str(COLUMN_DEFINITION) + r')' , TTYPE.definition.add_column_definition)
+
+ALTER_TABLE_ACTION = Token(r'(' + str(ADD_COLUMN_DEFINITION)  + r'|' + str(DROP_COLUMN_DEFINITION) + r')' , TTYPE.action)
+
+ALTER_TABLE_ACTION_LIST = [
+    ADD_COLUMN_DEFINITION,
+    DROP_COLUMN_DEFINITION
+]
 
 ALTER_TABLE_STATEMENT = Token(
     r'(ALTER TABLE)\s+' + r"(" 
@@ -107,35 +116,57 @@ def test_alter_table_single_action():
     sql_string_2 = "ALTER TABLE test ADD COLUMN `log` VARCHAR ( 12 ) NULL"
     sql_string_3 = "ALTER TABLE test ADD status INT ( 10 ) "
     sql_string_4 = "ALTER TABLE test ADD COLUMN status INT "
-    alter_table_statement_match = alter_table_statement_pattern.match(sql_string_3)
+    sql_string_5 = "ALTER TABLE test DROP COLUMN `count`  "
+    alter_table_statement_match = alter_table_statement_pattern.match(sql_string_1)
 
     print("(ALTER TABLE) COMMAND: ", alter_table_statement_match.group(1))
     print("(TABLE_NAME): ", alter_table_statement_match.group(2))
     print("(ALTER_TABLE_ACTION) group: ", alter_table_statement_match.group(3))
-  
+
     alter_table_action_pattern = re.compile(str(ALTER_TABLE_ACTION), re.IGNORECASE)
-    alter_table_action_match = alter_table_action_pattern.match(alter_table_statement_match.group(3))
- 
-    print("(ADD COLUMN DEFINITION): ", alter_table_action_match.group(1))
+    alter_table_action_pattern_match = alter_table_action_pattern.match(alter_table_statement_match.group(3))
+    action = alter_table_action_pattern_match.group(1)
+    for action_regex in ALTER_TABLE_ACTION_LIST:
+            action_pattern = re.compile(str(action_regex), re.IGNORECASE)
+            action_match = action_pattern.match(action)
+            
+            if not action_match:
+                continue
 
-    add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
-    add_column_definition_match = add_column_definition_pattern.match(alter_table_action_match.group(1))
-    print("(ADD COLUMN) COMMAND: ", add_column_definition_match.group(1))
-    print("(COLUMN DEFINITION): ", add_column_definition_match.group(2))
+            if action_regex.type == TTYPE.definition.drop_column_definition:
+                print("(DROP COLUMN): ", action_match.group(1))
+                print("(COLUMN NAME): ", action_match.group(2))
 
-    column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
-    column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
-    print("(COLUMN NAME): ", column_definition_match.group(1))
-    print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
+            if action_regex.type == TTYPE.definition.add_column_definition:
+                print("(ADD COLUMN) COMMAND: ", action_match.group(1))
+                print("(COLUMN DEFINITION): ", action_match.group(2))
+
+                column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
+                column_definition_match = column_definition_pattern.match(action_match.group(2))
+                print("(COLUMN NAME): ", column_definition_match.group(1))
+                print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
+
+                data_type_or_domain_pattern = re.compile(str(DATA_TYPE_OR_DOMAIN_NAME), re.IGNORECASE)
+                data_type_or_domain_match = data_type_or_domain_pattern.match(column_definition_match.group(2))
+                print("(DATA TYPE): ", data_type_or_domain_match.group(1))
+            
+                data_type_pattern =re.compile(str(DATA_TYPE), re.IGNORECASE)
+                data_type_match = data_type_pattern.match(data_type_or_domain_match.group(1))
+                print("(PREDEFINED DATA): ", data_type_match.group(1))
+
+                predifined_data_type_pattern = re.compile(str(PREDEFINED_TYPE), re.IGNORECASE)
+                predifined_data_type_match = predifined_data_type_pattern.match(data_type_match.group(1))
+                print("(NUMERIC OR CHAR): ", predifined_data_type_match.group(1))
+                print("(DIMENSION): ", predifined_data_type_match.group(2))
+    
 
 def test_alter_table_multi_action():
     alter_table_statement_pattern = re.compile(str(ALTER_TABLE_STATEMENT), re.IGNORECASE)
-    sql_string = "ALTER TABLE test ADD COLUMN `count` SMALLINT ( 10 ) , ADD COLUMN `log` VARCHAR ( 12 ) , ADD COLUMN status INT ( 10 ) "
+    sql_string = "ALTER TABLE test ADD COLUMN `count` SMALLINT ( 10 ) , ADD COLUMN `log` VARCHAR ( 12 ) , ADD COLUMN status INT ( 10 ) , DROP COLUMN `count`  "
     alter_table_statement_match = alter_table_statement_pattern.match(sql_string+" ,")
     print("(ALTER TABLE) COMMAND: ", alter_table_statement_match.group(1))
     print("(TABLE_NAME): ", alter_table_statement_match.group(2))
 
-    
     actions_list = []
     actions_list.append(alter_table_statement_match.group(3))
     actions_list.extend(sql_string.split(',')[1:])
@@ -144,41 +175,44 @@ def test_alter_table_multi_action():
         print(f"===== Action {i+1} ====")
         action = action.strip()
         print("Line 141: ", action)
-        alter_table_action_pattern = re.compile(str(ALTER_TABLE_ACTION), re.IGNORECASE)
-        alter_table_action_pattern_match = alter_table_action_pattern.match(action)
-    
-        print("(ADD COLUMN DEFINITION): ", alter_table_action_pattern_match.group(1))
 
-        add_column_definition_pattern = re.compile(str(ADD_COLUMN_DEFINITION), re.IGNORECASE)
-        add_column_definition_match = add_column_definition_pattern.match(alter_table_action_pattern_match.group(1))
-        print("(ADD COLUMN) COMMAND: ", add_column_definition_match.group(1))
-        print("(COLUMN DEFINITION): ", add_column_definition_match.group(2))
+        for action_regex in ALTER_TABLE_ACTION_LIST:
+            action_pattern = re.compile(str(action_regex), re.IGNORECASE)
+            action_match = action_pattern.match(action)
+            
+            if not action_match:
+                continue
 
-        column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
-        column_definition_match = column_definition_pattern.match(add_column_definition_match.group(2))
-        print("(COLUMN NAME): ", column_definition_match.group(1))
-        print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
+            if action_regex.type == TTYPE.definition.drop_column_definition:
+                print("(DROP COLUMN): ", action_match.group(1))
+                print("(COLUMN NAME): ", action_match.group(2))
+
+            if action_regex.type == TTYPE.definition.add_column_definition:
+                print("(ADD COLUMN) COMMAND: ", action_match.group(1))
+                print("(COLUMN DEFINITION): ", action_match.group(2))
+
+                column_definition_pattern = re.compile(str(COLUMN_DEFINITION), re.IGNORECASE)
+                column_definition_match = column_definition_pattern.match(action_match.group(2))
+                print("(COLUMN NAME): ", column_definition_match.group(1))
+                print("(DATA TYPE OR DOMAIN_NAME): ", column_definition_match.group(2))
+
+                data_type_or_domain_pattern = re.compile(str(DATA_TYPE_OR_DOMAIN_NAME), re.IGNORECASE)
+                data_type_or_domain_match = data_type_or_domain_pattern.match(column_definition_match.group(2))
+                print("(DATA TYPE): ", data_type_or_domain_match.group(1))
+            
+                data_type_pattern =re.compile(str(DATA_TYPE), re.IGNORECASE)
+                data_type_match = data_type_pattern.match(data_type_or_domain_match.group(1))
+                print("(PREDEFINED DATA): ", data_type_match.group(1))
+
+                predifined_data_type_pattern = re.compile(str(PREDEFINED_TYPE), re.IGNORECASE)
+                predifined_data_type_match = predifined_data_type_pattern.match(data_type_match.group(1))
+                print("(NUMERIC OR CHAR): ", predifined_data_type_match.group(1))
+                print("(DIMENSION): ", predifined_data_type_match.group(2))
         
-        data_type_or_domain_pattern = re.compile(str(DATA_TYPE_OR_DOMAIN_NAME), re.IGNORECASE)
-        data_type_or_domain_match = data_type_or_domain_pattern.match(column_definition_match.group(2))
-        print("(DATA TYPE): ", data_type_or_domain_match.group(1))
-       
-        data_type_pattern =re.compile(str(DATA_TYPE), re.IGNORECASE)
-        data_type_match = data_type_pattern.match(data_type_or_domain_match.group(1))
-        print("(PREDEFINED DATA): ", data_type_match.group(1))
-
-        predifined_data_type_pattern = re.compile(str(PREDEFINED_TYPE), re.IGNORECASE)
-        predifined_data_type_match = predifined_data_type_pattern.match(data_type_match.group(1))
-        print("(NUMERIC OR CHAR): ", predifined_data_type_match.group(1))
-        print("(DIMENSION): ", predifined_data_type_match.group(2))
-    
-
-
-
 # Main function
 if __name__=="__main__":
-   test_alter_table_single_action()
-#    test_alter_table_multi_action()
+#    test_alter_table_single_action()
+   test_alter_table_multi_action()
 
 
     
